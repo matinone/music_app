@@ -104,37 +104,51 @@
             <!-- Email -->
             <div class="mb-3">
               <label class="inline-block mb-2">Email</label>
-              <input
+              <vee-field
                 type="email"
+                name="email"
                 class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
                 placeholder="Enter Email"
               />
+              <error-message class="text-red-600" name="email"></error-message>
             </div>
             <!-- Age -->
             <div class="mb-3">
               <label class="inline-block mb-2">Age</label>
-              <input
+              <vee-field
                 type="number"
+                name="age"
                 class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
               />
+              <error-message class="text-red-600" name="age"></error-message>
             </div>
             <!-- Password -->
             <div class="mb-3">
               <label class="inline-block mb-2">Password</label>
-              <input
+              <vee-field
                 type="password"
+                name="password"
                 class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
                 placeholder="Password"
               />
+              <error-message
+                class="text-red-600"
+                name="password"
+              ></error-message>
             </div>
             <!-- Confirm Password -->
             <div class="mb-3">
               <label class="inline-block mb-2">Confirm Password</label>
-              <input
+              <vee-field
                 type="password"
+                name="confirm_password"
                 class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
                 placeholder="Confirm Password"
               />
+              <error-message
+                class="text-red-600"
+                name="confirm_password"
+              ></error-message>
             </div>
             <!-- Country -->
             <div class="mb-3">
@@ -179,10 +193,10 @@ export default {
       tab: "login",
       schema: {
         name: "required|min:3|max:100|alpha_spaces",
-        age: "",
-        email: "",
-        password: "",
-        confirm_password: "",
+        email: "required|min:3|max:100|email",
+        age: "required|min_value:18|max_value:120",
+        password: "required|min:3|max:100",
+        confirm_password: "confirmed:@password",
         tos: "",
       },
     };
