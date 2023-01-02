@@ -142,7 +142,7 @@ export default {
       this.reg_in_submission = true;
       this.reg_show_alert = true;
       this.reg_alert_bg = "bg-blue-500";
-      this.reg_alert_msg = "Please wait, your account is being created";
+      this.reg_alert_msg = "Please wait, your account is being created.";
 
       // submit form here
 
