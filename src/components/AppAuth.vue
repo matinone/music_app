@@ -218,9 +218,9 @@ export default {
         email: "required|min:3|max:100|email",
         age: "required|min_value:18|max_value:120",
         password: "required|min:8|max:100|not_one_of:password,12345",
-        confirm_password: "confirmed:@password",
+        confirm_password: "password_match:@password",
         country: "required",
-        tos: "required",
+        tos: "tos_required",
       },
       initialData: {
         country: "USA",
