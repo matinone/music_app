@@ -113,7 +113,7 @@
 </template>
 
 <script>
-import firebase from "@/includes/firebase";
+import { auth } from "@/includes/firebase";
 
 export default {
   name: "RegisterForm",
@@ -149,9 +149,10 @@ export default {
       // create new user in Firebase
       let userCred = null;
       try {
-        userCred = await firebase
-          .auth()
-          .createUserWithEmailAndPassword(values.email, values.password);
+        userCred = await auth.createUserWithEmailAndPassword(
+          values.email,
+          values.password
+        );
       } catch (error) {
         this.reg_in_submission = false;
         this.reg_alert_bg = "bg-red-500";
