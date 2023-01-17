@@ -113,6 +113,8 @@
 </template>
 
 <script>
+import firebase from "@/includes/firebase";
+
 export default {
   name: "RegisterForm",
   data() {
@@ -137,18 +139,30 @@ export default {
   },
 
   methods: {
-    register(values) {
+    async register(values) {
       // it will only be executed if the validation rules pass
       this.reg_in_submission = true;
       this.reg_show_alert = true;
       this.reg_alert_bg = "bg-blue-500";
       this.reg_alert_msg = "Please wait, your account is being created.";
 
-      // submit form here
+      // create new user in Firebase
+      let userCred = null;
+      try {
+        userCred = await firebase
+          .auth()
+          .createUserWithEmailAndPassword(values.email, values.password);
+      } catch (error) {
+        this.reg_in_submission = false;
+        this.reg_alert_bg = "bg-red-500";
+        this.reg_alert_msg =
+          "An unexpected error occured, please try again later.";
+        return;
+      }
 
       this.reg_alert_bg = "bg-green-500";
       this.reg_alert_msg = "Success! Your account has been created.";
-      console.log(values);
+      console.log(userCred);
     },
   },
 };
