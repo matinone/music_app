@@ -128,6 +128,8 @@
 
 <script>
 import { auth, usersCollection } from "@/includes/firebase";
+import { mapWritableState } from "pinia";
+import useUserStore from "@/stores/user.js";
 
 export default {
   name: "RegisterForm",
@@ -154,6 +156,10 @@ export default {
     };
   },
 
+  computed: {
+    ...mapWritableState(useUserStore, ["userLoggedIn"]),
+  },
+
   methods: {
     async register(values) {
       // it will only be executed if the validation rules pass
@@ -169,6 +175,8 @@ export default {
           values.email,
           values.password
         );
+
+        this.userLoggedIn = true;
       } catch (error) {
         this.reg_in_submission = false;
         this.reg_alert_bg = "bg-red-500";
