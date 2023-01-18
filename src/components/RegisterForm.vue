@@ -44,6 +44,20 @@
         />
         <error-message class="text-red-600" name="age"></error-message>
       </div>
+      <!-- Gender -->
+      <div class="mb-3">
+        <label class="inline-block mb-2">Age</label>
+        <vee-field
+          as="select"
+          name="gender"
+          class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
+        >
+          <option value="female">Female</option>
+          <option value="male">Male</option>
+          <option value="other">Other</option>
+        </vee-field>
+        <error-message class="text-red-600" name="gender"></error-message>
+      </div>
       <!-- Password -->
       <div class="mb-3">
         <label class="inline-block mb-2">Password</label>
@@ -113,7 +127,7 @@
 </template>
 
 <script>
-import { auth } from "@/includes/firebase";
+import { auth, usersCollection } from "@/includes/firebase";
 
 export default {
   name: "RegisterForm",
@@ -123,6 +137,7 @@ export default {
         name: "required|min:3|max:100|alpha_spaces",
         email: "required|min:3|max:100|email",
         age: "required|min_value:18|max_value:120",
+        gender: "required",
         password: "required|min:8|max:100|not_one_of:password,12345",
         confirm_password: "password_match:@password",
         country: "required",
@@ -130,6 +145,7 @@ export default {
       },
       initialData: {
         country: "USA",
+        gender: "female",
       },
       reg_in_submission: false,
       reg_show_alert: false,
@@ -146,13 +162,30 @@ export default {
       this.reg_alert_bg = "bg-blue-500";
       this.reg_alert_msg = "Please wait, your account is being created.";
 
-      // create new user in Firebase
+      // create new user in Firebase Auth service
       let userCred = null;
       try {
         userCred = await auth.createUserWithEmailAndPassword(
           values.email,
           values.password
         );
+      } catch (error) {
+        this.reg_in_submission = false;
+        this.reg_alert_bg = "bg-red-500";
+        this.reg_alert_msg =
+          "An unexpected error occured, please try again later.";
+        return;
+      }
+
+      // add user data to Firestore
+      try {
+        await usersCollection.add({
+          name: values.name,
+          email: values.email,
+          age: values.age,
+          gender: values.gender,
+          country: values.country,
+        });
       } catch (error) {
         this.reg_in_submission = false;
         this.reg_alert_bg = "bg-red-500";
