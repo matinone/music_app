@@ -128,7 +128,7 @@
 
 <script>
 import { auth, usersCollection } from "@/includes/firebase";
-import { mapWritableState } from "pinia";
+import { mapActions } from "pinia";
 import useUserStore from "@/stores/user.js";
 
 export default {
@@ -156,11 +156,11 @@ export default {
     };
   },
 
-  computed: {
-    ...mapWritableState(useUserStore, ["userLoggedIn"]),
-  },
-
   methods: {
+    ...mapActions(useUserStore, {
+      createUser: "register",
+    }),
+
     async register(values) {
       // it will only be executed if the validation rules pass
       this.reg_in_submission = true;
@@ -168,32 +168,9 @@ export default {
       this.reg_alert_bg = "bg-blue-500";
       this.reg_alert_msg = "Please wait, your account is being created.";
 
-      // create new user in Firebase Auth service
-      let userCred = null;
+      // create new user in Firebase Auth service and add user data to Firestore
       try {
-        userCred = await auth.createUserWithEmailAndPassword(
-          values.email,
-          values.password
-        );
-
-        this.userLoggedIn = true;
-      } catch (error) {
-        this.reg_in_submission = false;
-        this.reg_alert_bg = "bg-red-500";
-        this.reg_alert_msg =
-          "An unexpected error occured, please try again later.";
-        return;
-      }
-
-      // add user data to Firestore
-      try {
-        await usersCollection.add({
-          name: values.name,
-          email: values.email,
-          age: values.age,
-          gender: values.gender,
-          country: values.country,
-        });
+        await this.createUser(values);
       } catch (error) {
         this.reg_in_submission = false;
         this.reg_alert_bg = "bg-red-500";
@@ -204,7 +181,6 @@ export default {
 
       this.reg_alert_bg = "bg-green-500";
       this.reg_alert_msg = "Success! Your account has been created.";
-      console.log(userCred);
     },
   },
 };
