@@ -31,5 +31,9 @@ export default defineStore("user", {
       // if authentication fails, it will throw and error and this will never run
       this.userLoggedIn = true;
     },
+    async signOut() {
+      auth.signOut();
+      this.userLoggedIn = false;
+    },
   },
 });
