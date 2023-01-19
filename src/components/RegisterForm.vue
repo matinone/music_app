@@ -127,7 +127,6 @@
 </template>
 
 <script>
-import { auth, usersCollection } from "@/includes/firebase";
 import { mapActions } from "pinia";
 import useUserStore from "@/stores/user.js";
 

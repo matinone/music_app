@@ -25,5 +25,11 @@ export default defineStore("user", {
 
       this.userLoggedIn = true;
     },
+    async authenticate(email, password) {
+      await auth.signInWithEmailAndPassword(email, password);
+
+      // if authentication fails, it will throw and error and this will never run
+      this.userLoggedIn = true;
+    },
   },
 });
