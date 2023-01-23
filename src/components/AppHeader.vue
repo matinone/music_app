@@ -4,7 +4,7 @@
       <!-- App Name -->
       <router-link
         class="text-white font-bold uppercase text-2xl mr-4"
-        to="/"
+        :to="{ name: 'home' }"
         exact-active-class="no-active"
       >
         Music
@@ -21,7 +21,7 @@
           </li>
           <template v-else>
             <li>
-              <router-link class="px-2 text-white" to="/manage">
+              <router-link class="px-2 text-white" :to="{ name: 'manage' }">
                 Manage
               </router-link>
             </li>
@@ -35,7 +35,9 @@
             </li>
           </template>
           <li>
-            <router-link class="px-2 text-white" to="/about">About</router-link>
+            <router-link class="px-2 text-white" :to="{ name: 'about' }">
+              About
+            </router-link>
           </li>
         </ul>
       </div>
