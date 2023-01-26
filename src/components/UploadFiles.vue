@@ -23,32 +23,17 @@
       </div>
       <hr class="my-6" />
       <!-- Progess Bars -->
-      <div class="mb-4">
+      <div class="mb-4" v-for="upload in uploads" :key="upload.name">
         <!-- File Name -->
-        <div class="font-bold text-sm">Just another song.mp3</div>
+        <div class="font-bold text-sm" :class="upload.textColor">
+          <i :class="upload.icon"></i> {{ upload.name }}
+        </div>
         <div class="flex h-4 overflow-hidden bg-gray-200 rounded">
           <!-- Inner Progress Bar -->
           <div
-            class="transition-all progress-bar bg-blue-400"
-            style="width: 75%"
-          ></div>
-        </div>
-      </div>
-      <div class="mb-4">
-        <div class="font-bold text-sm">Just another song.mp3</div>
-        <div class="flex h-4 overflow-hidden bg-gray-200 rounded">
-          <div
-            class="transition-all progress-bar bg-blue-400"
-            style="width: 35%"
-          ></div>
-        </div>
-      </div>
-      <div class="mb-4">
-        <div class="font-bold text-sm">Just another song.mp3</div>
-        <div class="flex h-4 overflow-hidden bg-gray-200 rounded">
-          <div
-            class="transition-all progress-bar bg-blue-400"
-            style="width: 55%"
+            class="transition-all progress-bar"
+            :class="upload.barColor"
+            :style="{ width: upload.currentProgress + '%' }"
           ></div>
         </div>
       </div>
@@ -57,11 +42,14 @@
 </template>
 
 <script>
+import { storage } from "@/includes/firebase";
+
 export default {
   name: "UploadFiles",
   data() {
     return {
       is_dragover: false,
+      uploads: [],
     };
   },
   methods: {
@@ -69,13 +57,48 @@ export default {
       this.is_dragover = false;
 
       // convert object to array
-      const files = [...$event.dataTranfer.files];
+      const files = [...$event.dataTransfer.files];
       files.forEach((file) => {
         if (file.type !== "audio/mpeg") {
           return; // end current iteration
         }
 
         // upload file to Firebase
+        const storageRef = storage.ref();
+        const songRef = storageRef.child(`songs/${file.name}`); // pointer to file in the cloud
+        const task = songRef.put(file);
+
+        // push returns the new length of the array, so length - 1 is the index of the last element
+        const uploadIndex =
+          this.uploads.push({
+            task,
+            currentProgress: 0,
+            name: file.name,
+            barColor: "bg-blue-400",
+            icon: "fas fa-spinner fa-spin",
+            textColor: "",
+          }) - 1;
+
+        // keep track of the upload status (progress, success, failure)
+        task.on(
+          "state_changed",
+          (snapshot) => {
+            const progress =
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            this.uploads[uploadIndex].currentProgress = progress;
+          },
+          (error) => {
+            this.uploads[uploadIndex].barColor = "bg-red-400";
+            this.uploads[uploadIndex].icon = "fas fa-times";
+            this.uploads[uploadIndex].textColor = "text-red-400";
+            console.log(error);
+          },
+          () => {
+            this.uploads[uploadIndex].barColor = "bg-green-400";
+            this.uploads[uploadIndex].icon = "fas fa-check";
+            this.uploads[uploadIndex].textColor = "text-green-400";
+          }
+        );
       });
     },
   },
