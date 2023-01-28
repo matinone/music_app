@@ -21,6 +21,7 @@
       >
         <h5>Drop your files here</h5>
       </div>
+      <input type="file" multiple @change="uploadFile($event)" />
       <hr class="my-6" />
       <!-- Progess Bars -->
       <div class="mb-4" v-for="upload in uploads" :key="upload.name">
@@ -43,7 +44,6 @@
 
 <script>
 import { storage, auth, songsCollection } from "@/includes/firebase";
-import { trackSlotScopes } from "@vue/compiler-core";
 
 export default {
   name: "UploadFiles",
@@ -58,7 +58,10 @@ export default {
       this.is_dragover = false;
 
       // convert object to array
-      const files = [...$event.dataTransfer.files];
+      const files = $event.dataTransfer
+        ? [...$event.dataTransfer.files] // drag and drop event
+        : [...$event.target.files]; // file input button
+
       files.forEach((file) => {
         if (file.type !== "audio/mpeg") {
           return; // end current iteration
