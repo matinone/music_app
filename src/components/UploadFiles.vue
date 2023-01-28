@@ -118,5 +118,11 @@ export default {
       });
     },
   },
+  beforeUnmount() {
+    // cancel file uploads if the user leaves the page
+    this.uploads.forEach((upload) => {
+      upload.task.cancel();
+    });
+  },
 };
 </script>
