@@ -42,7 +42,8 @@
 </template>
 
 <script>
-import { storage } from "@/includes/firebase";
+import { storage, auth, songsCollection } from "@/includes/firebase";
+import { trackSlotScopes } from "@vue/compiler-core";
 
 export default {
   name: "UploadFiles",
@@ -93,7 +94,19 @@ export default {
             this.uploads[uploadIndex].textColor = "text-red-400";
             console.log(error);
           },
-          () => {
+          async () => {
+            const song = {
+              uid: auth.currentUser.uid,
+              userDisplayName: auth.currentUser.displayName,
+              originalName: task.snapshot.ref.name,
+              modifiedName: task.snapshot.ref.name,
+              genre: "",
+              commentCount: 0,
+            };
+
+            song.url = await task.snapshot.ref.getDownloadURL();
+            await songsCollection.add(song);
+
             this.uploads[uploadIndex].barColor = "bg-green-400";
             this.uploads[uploadIndex].icon = "fas fa-check";
             this.uploads[uploadIndex].textColor = "text-green-400";
