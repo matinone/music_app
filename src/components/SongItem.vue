@@ -1,6 +1,6 @@
 <template>
   <div class="border border-gray-200 p-3 mb-4 rounded">
-    <div v-show="!showForm">
+    <div>
       <h4 class="inline-block text-2xl font-bold">{{ song.modifiedName }}</h4>
       <button
         class="ml-1 py-1 px-2 text-sm rounded text-white bg-red-600 float-right"
@@ -15,6 +15,13 @@
       </button>
     </div>
     <div v-show="showForm">
+      <div
+        class="text-white text-center font-bold p-4 mb-4"
+        v-if="showAlert"
+        :class="alertColor"
+      >
+        {{ alertMessage }}
+      </div>
       <vee-form
         :validation-schema="validationSchema"
         :initial-values="song"
@@ -46,12 +53,15 @@
         <button
           type="submit"
           class="py-1.5 px-3 rounded text-white bg-green-600"
+          :disabled="inSubmission"
         >
           Submit
         </button>
         <button
           type="button"
           class="py-1.5 px-3 rounded text-white bg-gray-600"
+          :disabled="inSubmission"
+          @click.prevent="showForm = false"
         >
           Go Back
         </button>
@@ -61,11 +71,21 @@
 </template>
 
 <script>
+import { songsCollection } from "@/includes/firebase";
+
 export default {
   name: "SongItem",
   props: {
     song: {
       type: Object,
+      required: true,
+    },
+    index: {
+      type: Number,
+      required: true,
+    },
+    updateSong: {
+      type: Function,
       required: true,
     },
   },
@@ -76,11 +96,33 @@ export default {
         modifiedName: "required",
         genre: "alpha_spaces",
       },
+      inSubmission: false,
+      showAlert: false,
+      alertColor: "bg-blue-500",
+      alertMessage: "Please wait, updating song information.",
     };
   },
   methods: {
-    editSong() {
-      console.log("Song edited");
+    async editSong(values) {
+      this.inSubmission = true;
+      this.showAlert = true;
+      this.alertColor = "bg-blue-500";
+      this.alertMessage = "Please wait, updating song information.";
+
+      try {
+        await songsCollection.doc(this.song.docId).update(values);
+      } catch (error) {
+        this.inSubmission = false;
+        this.alertColor = "bg-red-500";
+        this.alertMessage = "Something went wrong, please try again later.";
+        return;
+      }
+
+      this.updateSong(this.index, values);
+
+      this.inSubmission = false;
+      this.alertColor = "bg-green-500";
+      this.alertMessage = "Success!";
     },
   },
 };
