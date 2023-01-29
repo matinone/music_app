@@ -15,22 +15,33 @@
       </button>
     </div>
     <div v-show="showForm">
-      <form>
+      <vee-form
+        :validation-schema="validationSchema"
+        :initial-values="song"
+        @submit="editSong"
+      >
         <div class="mb-3">
           <label class="inline-block mb-2">Song Title</label>
-          <input
+          <vee-field
+            name="modifiedName"
             type="text"
             class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
             placeholder="Enter Song Title"
           />
+          <error-message
+            class="text-red-600"
+            name="modifiedName"
+          ></error-message>
         </div>
         <div class="mb-3">
           <label class="inline-block mb-2">Genre</label>
-          <input
+          <vee-field
+            name="genre"
             type="text"
             class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
             placeholder="Enter Genre"
           />
+          <error-message class="text-red-600" name="genre"></error-message>
         </div>
         <button
           type="submit"
@@ -44,7 +55,7 @@
         >
           Go Back
         </button>
-      </form>
+      </vee-form>
     </div>
   </div>
 </template>
@@ -61,7 +72,16 @@ export default {
   data() {
     return {
       showForm: false,
+      validationSchema: {
+        modifiedName: "required",
+        genre: "alpha_spaces",
+      },
     };
+  },
+  methods: {
+    editSong() {
+      console.log("Song edited");
+    },
   },
 };
 </script>
