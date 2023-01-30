@@ -4,6 +4,7 @@
       <h4 class="inline-block text-2xl font-bold">{{ song.modifiedName }}</h4>
       <button
         class="ml-1 py-1 px-2 text-sm rounded text-white bg-red-600 float-right"
+        @click.prevent="deleteSong"
       >
         <i class="fa fa-times"></i>
       </button>
@@ -71,7 +72,7 @@
 </template>
 
 <script>
-import { songsCollection } from "@/includes/firebase";
+import { songsCollection, storage } from "@/includes/firebase";
 
 export default {
   name: "SongItem",
@@ -85,6 +86,10 @@ export default {
       required: true,
     },
     updateSong: {
+      type: Function,
+      required: true,
+    },
+    removeSong: {
       type: Function,
       required: true,
     },
@@ -123,6 +128,18 @@ export default {
       this.inSubmission = false;
       this.alertColor = "bg-green-500";
       this.alertMessage = "Success!";
+    },
+    async deleteSong() {
+      // remove from Firebase storage
+      const storageRef = storage.ref();
+      const songRef = storageRef.child(`songs/${this.song.originalName}`);
+      await songRef.delete();
+
+      // remove from Firebase database
+      await songsCollection.doc(this.song.docId).delete();
+
+      // remove from songs array
+      this.removeSong(this.index);
     },
   },
 };
