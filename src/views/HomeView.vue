@@ -53,20 +53,71 @@ export default {
   components: {
     SongItemHome,
   },
+
   data() {
     return {
       songs: [],
+      maxPerPage: 25,
+      pendingRequest: false,
     };
   },
+
   async created() {
-    // query all the songs when the home component is created
-    const snapshots = await songsCollection.get();
-    snapshots.forEach((document) => {
-      this.songs.push({
-        docId: document.id,
-        ...document.data(),
+    // query initial songs when the home component is created
+    this.getSongs();
+
+    // then query more songs as the user scrolls down
+    window.addEventListener("scroll", this.handleScroll);
+  },
+  beforeUnmount() {
+    // remove the event listener if the user leaves the page
+    window.removeEventListener("scroll", this.handleScroll);
+  },
+
+  methods: {
+    async getSongs() {
+      if (this.pendingRequest) {
+        return;
+      }
+
+      this.pendingRequest = true;
+
+      let snapshots;
+      if (this.songs.length > 0) {
+        const lastDoc = await songsCollection
+          .doc(this.songs[this.songs.length - 1].docId)
+          .get();
+        snapshots = await songsCollection
+          .orderBy("modifiedName")
+          .startAfter(lastDoc)
+          .limit(this.maxPerPage)
+          .get();
+      } else {
+        snapshots = await songsCollection
+          .orderBy("modifiedName")
+          .limit(this.maxPerPage)
+          .get();
+      }
+
+      snapshots.forEach((document) => {
+        this.songs.push({
+          docId: document.id,
+          ...document.data(),
+        });
       });
-    });
+
+      this.pendingRequest = false;
+    },
+
+    handleScroll() {
+      const { scrollTop, offsetHeight } = document.documentElement;
+      const { innerHeight } = window;
+      const bottomWindow = Math.round(scrollTop) + innerHeight === offsetHeight;
+
+      if (bottomWindow) {
+        this.getSongs();
+      }
+    },
   },
 };
 </script>

@@ -6,7 +6,9 @@
       <a href="#" class="font-bold block text-gray-600">
         {{ song.modifiedName }}
       </a>
-      <span class="text-gray-500 text-sm">{{ song.userDisplayName }}</span>
+      <span class="text-gray-500 text-sm italic">
+        Uploaded by {{ song.userDisplayName }}
+      </span>
     </div>
 
     <div class="text-gray-600 text-lg">
