@@ -68,16 +68,19 @@
   </section>
   <!-- Comments -->
   <ul class="container mx-auto">
-    <li class="p-6 bg-gray-50 border border-gray-200">
+    <li
+      class="p-6 bg-gray-50 border border-gray-200"
+      v-for="comment in comments"
+      :key="comment.docId"
+    >
       <!-- Comment Author -->
       <div class="mb-5">
-        <div class="font-bold">Elaine Dreyfuss</div>
-        <time>5 mins ago</time>
+        <div class="font-bold">{{ comment.username }}</div>
+        <time>{{ comment.datePosted }}</time>
       </div>
 
       <p>
-        Sed ut perspiciatis unde omnis iste natus error sit voluptatem
-        accusantium der doloremque laudantium.
+        {{ comment.content }}
       </p>
     </li>
   </ul>
@@ -93,6 +96,7 @@ export default {
   data() {
     return {
       song: {},
+      comments: [],
       validationSchema: {
         comment: "required|min:3",
       },
@@ -115,6 +119,7 @@ export default {
     }
 
     this.song = snapshot.data();
+    this.getComments();
   },
 
   methods: {
@@ -140,6 +145,19 @@ export default {
       this.commentAlertMessage = "Comment added.";
 
       resetForm(); // available in VeeValidate
+    },
+    async getComments() {
+      const snapshots = await commentsCollection
+        .where("songId", "==", this.$route.params.id)
+        .get();
+
+      this.comments = [];
+      snapshots.forEach((document) => {
+        this.comments.push({
+          docId: document.id,
+          ...document.data(),
+        });
+      });
     },
   },
 };
