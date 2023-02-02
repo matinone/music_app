@@ -132,6 +132,11 @@ export default {
       return;
     }
 
+    const { sort } = this.$route.query;
+    if (sort === "latest" || sort === "oldest") {
+      this.sort = sort; // use default value otherwise
+    }
+
     this.song = snapshot.data();
     this.getComments();
   },
@@ -173,6 +178,18 @@ export default {
           ...document.data(),
         });
       });
+    },
+  },
+
+  watch: {
+    sort(newVal) {
+      if (newVal !== this.$route.query.sort) {
+        this.$router.push({
+          query: {
+            sort: newVal,
+          },
+        });
+      }
     },
   },
 };
