@@ -58,10 +58,11 @@
         </vee-form>
         <!-- Sort Comments -->
         <select
+          v-model="sort"
           class="block mt-4 py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
         >
-          <option value="1">Latest</option>
-          <option value="2">Oldest</option>
+          <option value="latest">Latest</option>
+          <option value="oldest">Oldest</option>
         </select>
       </div>
     </div>
@@ -70,7 +71,7 @@
   <ul class="container mx-auto">
     <li
       class="p-6 bg-gray-50 border border-gray-200"
-      v-for="comment in comments"
+      v-for="comment in sortedComments"
       :key="comment.docId"
     >
       <!-- Comment Author -->
@@ -97,6 +98,7 @@ export default {
     return {
       song: {},
       comments: [],
+      sort: "latest",
       validationSchema: {
         comment: "required|min:3",
       },
@@ -108,6 +110,18 @@ export default {
   },
   computed: {
     ...mapState(useUserStore, ["userLoggedIn"]),
+    sortedComments() {
+      // create a copy before sorting the array
+      return this.comments.slice().sort((a, b) => {
+        if (this.sort === "latest") {
+          // from latest to oldest (descending date order)
+          return new Date(b.datePosted) - new Date(a.datePosted);
+        }
+
+        // from oldest to latest (ascending date order)
+        return new Date(a.datePosted) - new Date(b.datePosted);
+      });
+    },
   },
   async created() {
     const snapshot = await songsCollection.doc(this.$route.params.id).get();
@@ -139,6 +153,7 @@ export default {
       };
 
       await commentsCollection.add(comment);
+      this.getComments();
 
       this.commentInSubmission = false;
       this.commentAlertColor = "bg-green-500";
