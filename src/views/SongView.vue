@@ -10,6 +10,7 @@
       <button
         type="button"
         class="z-50 h-24 w-24 text-3xl bg-white text-black rounded-full focus:outline-none"
+        @click.prevent="newSong(song)"
       >
         <i class="fas fa-play"></i>
       </button>
@@ -89,8 +90,9 @@
 
 <script>
 import { auth, songsCollection, commentsCollection } from "@/includes/firebase";
-import { mapState } from "pinia";
+import { mapState, mapActions } from "pinia";
 import useUserStore from "@/stores/user";
+import usePlayerStore from "@/stores/player";
 
 export default {
   name: "SongView",
@@ -108,6 +110,7 @@ export default {
       commentAlertMessage: "Please wait, your comment is being submitted.",
     };
   },
+
   computed: {
     ...mapState(useUserStore, ["userLoggedIn"]),
     sortedComments() {
@@ -123,6 +126,7 @@ export default {
       });
     },
   },
+
   async created() {
     const snapshot = await songsCollection.doc(this.$route.params.id).get();
 
@@ -142,6 +146,7 @@ export default {
   },
 
   methods: {
+    ...mapActions(usePlayerStore, ["newSong"]),
     async addComment(values, { resetForm }) {
       this.commentInSubmission = true;
       this.commentShowAlert = true;
