@@ -1,10 +1,14 @@
 import { defineStore } from "pinia";
 import { Howl } from "howler";
 
+import helper from "@/includes/helper";
+
 export default defineStore("player", {
   state: () => ({
     currentSong: {},
     sound: {},
+    seek: "00:00", // song current position
+    duration: "00:00",
   }),
   actions: {
     async newSong(song) {
@@ -16,6 +20,10 @@ export default defineStore("player", {
       });
 
       this.sound.play();
+
+      this.sound.on("play", () => {
+        requestAnimationFrame(this.progress);
+      });
     },
 
     async toggleAudio() {
@@ -28,6 +36,15 @@ export default defineStore("player", {
         this.sound.pause();
       } else {
         this.sound.play();
+      }
+    },
+
+    progress() {
+      this.seek = helper.formatTime(this.sound.seek());
+      this.duration = helper.formatTime(this.sound.duration());
+
+      if (this.sound.playing()) {
+        requestAnimationFrame(this.progress);
       }
     },
   },
