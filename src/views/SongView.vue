@@ -12,7 +12,7 @@
         class="z-50 h-24 w-24 text-3xl bg-white text-black rounded-full focus:outline-none"
         @click.prevent="newSong(song)"
       >
-        <i class="fas fa-play"></i>
+        <i class="fas" :class="iconClass"></i>
       </button>
       <div class="z-50 text-left ml-8">
         <!-- Song Info -->
@@ -113,6 +113,7 @@ export default {
 
   computed: {
     ...mapState(useUserStore, ["userLoggedIn"]),
+    ...mapState(usePlayerStore, ["playing", "currentSong"]),
     sortedComments() {
       // create a copy before sorting the array
       return this.comments.slice().sort((a, b) => {
@@ -124,6 +125,17 @@ export default {
         // from oldest to latest (ascending date order)
         return new Date(a.datePosted) - new Date(b.datePosted);
       });
+    },
+    iconClass() {
+      return {
+        "fa-play":
+          !this.playing ||
+          (this.playing &&
+            this.currentSong.modifiedName !== this.song.modifiedName),
+        "fa-pause":
+          this.playing &&
+          this.currentSong.modifiedName === this.song.modifiedName,
+      };
     },
   },
 

@@ -13,6 +13,11 @@ export default defineStore("player", {
   }),
   actions: {
     async newSong(song) {
+      if (song.modifiedName === this.currentSong.modifiedName) {
+        this.toggleAudio();
+        return;
+      }
+
       if (this.sound instanceof Howl) {
         this.sound.unload();
       }
