@@ -56,6 +56,22 @@ export default defineStore("player", {
         requestAnimationFrame(this.progress);
       }
     },
+
+    updateSeek(event) {
+      if (!this.sound.playing) {
+        return;
+      }
+
+      // get X coordinate relative to the start of the progress bar
+      const { x, width } = event.currentTarget.getBoundingClientRect();
+      const clickX = event.clientX - x;
+      const percentage = clickX / width;
+
+      // update current song position
+      const seconds = this.sound.duration() * percentage;
+      this.sound.seek(seconds);
+      this.sound.once("seek", this.progress);
+    },
   },
 
   getters: {
