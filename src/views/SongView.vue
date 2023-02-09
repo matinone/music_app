@@ -144,22 +144,25 @@ export default {
     },
   },
 
-  async created() {
-    const snapshot = await songsCollection.doc(this.$route.params.id).get();
+  async beforeRouteEnter(to, from, next) {
+    // get the song information before loading the page
+    const snapshot = await songsCollection.doc(to.params.id).get();
 
-    // redirect to home page if song doesn't exist
-    if (!snapshot.exists) {
-      this.$router.push({ name: "home" });
-      return;
-    }
+    next((vm) => {
+      // redirect to home page if song doesn't exist
+      if (!snapshot.exists) {
+        vm.$router.push({ name: "home" });
+        return;
+      }
 
-    const { sort } = this.$route.query;
-    if (sort === "latest" || sort === "oldest") {
-      this.sort = sort; // use default value otherwise
-    }
+      const { sort } = vm.$route.query;
+      if (sort === "latest" || sort === "oldest") {
+        vm.sort = sort; // use default value otherwise
+      }
 
-    this.song = snapshot.data();
-    this.getComments();
+      vm.song = snapshot.data();
+      vm.getComments();
+    });
   },
 
   methods: {
