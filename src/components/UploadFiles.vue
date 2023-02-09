@@ -73,6 +73,18 @@ export default {
           return; // end current iteration
         }
 
+        if (!navigator.onLine) {
+          this.uploads.push({
+            task: {},
+            currentProgress: 100,
+            name: file.name,
+            barColor: "bg-red-400",
+            icon: "fas fa-times",
+            textColor: "text-red-400",
+          });
+          return;
+        }
+
         // upload file to Firebase
         const storageRef = storage.ref();
         const songRef = storageRef.child(`songs/${file.name}`); // pointer to file in the cloud
