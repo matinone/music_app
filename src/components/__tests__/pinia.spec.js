@@ -1,5 +1,4 @@
 import { it, expect, describe, beforeEach, vi } from "vitest";
-
 import { setActivePinia, createPinia } from "pinia";
 
 import useUserStore from "@/stores/user";
