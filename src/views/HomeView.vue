@@ -46,84 +46,70 @@
   </section>
 </template>
 
-<script>
+<script setup>
+import { reactive, onBeforeUnmount } from "vue";
+
 import { songsCollection } from "@/includes/firebase";
 import SongItemHome from "@/components/SongItemHome.vue";
 import IconSecondary from "@/directives/icon-secondary";
 
-export default {
-  name: "AppHome",
-  components: {
-    SongItemHome,
-  },
-  directives: {
-    "icon-secondary": IconSecondary,
-  },
+// custom directive
+const vIconSecondary = IconSecondary;
 
-  data() {
-    return {
-      songs: [],
-      maxPerPage: 25,
-      pendingRequest: false,
-    };
-  },
+const songs = reactive([]);
+const maxPerPage = 25;
+let pendingRequest = false;
 
-  async created() {
-    // query initial songs when the home component is created
-    this.getSongs();
+async function getSongs() {
+  if (pendingRequest) {
+    return;
+  }
 
-    // then query more songs as the user scrolls down
-    window.addEventListener("scroll", this.handleScroll);
-  },
-  beforeUnmount() {
-    // remove the event listener if the user leaves the page
-    window.removeEventListener("scroll", this.handleScroll);
-  },
+  pendingRequest = true;
+  let snapshots;
+  if (songs.length > 0) {
+    const lastDoc = await songsCollection
+      .doc(songs[songs.length - 1].docId)
+      .get();
+    snapshots = await songsCollection
+      .orderBy("modifiedName")
+      .startAfter(lastDoc)
+      .limit(maxPerPage)
+      .get();
+  } else {
+    snapshots = await songsCollection
+      .orderBy("modifiedName")
+      .limit(maxPerPage)
+      .get();
+  }
 
-  methods: {
-    async getSongs() {
-      if (this.pendingRequest) {
-        return;
-      }
+  snapshots.forEach((document) => {
+    songs.push({
+      docId: document.id,
+      ...document.data(),
+    });
+  });
 
-      this.pendingRequest = true;
+  pendingRequest = false;
+}
 
-      let snapshots;
-      if (this.songs.length > 0) {
-        const lastDoc = await songsCollection
-          .doc(this.songs[this.songs.length - 1].docId)
-          .get();
-        snapshots = await songsCollection
-          .orderBy("modifiedName")
-          .startAfter(lastDoc)
-          .limit(this.maxPerPage)
-          .get();
-      } else {
-        snapshots = await songsCollection
-          .orderBy("modifiedName")
-          .limit(this.maxPerPage)
-          .get();
-      }
+// query initial songs when the home component is created
+getSongs();
 
-      snapshots.forEach((document) => {
-        this.songs.push({
-          docId: document.id,
-          ...document.data(),
-        });
-      });
+// then query more songs as the user scrolls down
+function handleScroll() {
+  const { scrollTop, offsetHeight } = document.documentElement;
+  const { innerHeight } = window;
+  const bottomWindow = Math.round(scrollTop) + innerHeight === offsetHeight;
 
-      this.pendingRequest = false;
-    },
+  if (bottomWindow) {
+    getSongs();
+  }
+}
+window.addEventListener("scroll", handleScroll);
 
-    handleScroll() {
-      const { scrollTop, offsetHeight } = document.documentElement;
-      const { innerHeight } = window;
-      const bottomWindow = Math.round(scrollTop) + innerHeight === offsetHeight;
-
-      if (bottomWindow) {
-        this.getSongs();
-      }
-    },
-  },
-};
+// remove the event listener if the user leaves the page
+onBeforeUnmount(() => {
+  window.removeEventListener("scroll", handleScroll);
+});
 </script>
